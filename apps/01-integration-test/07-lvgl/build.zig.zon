@@ -1,0 +1,25 @@
+.{
+    .name = .integration_test_lvgl,
+    .version = "0.1.0",
+    .fingerprint = 0x2bc4a83a2bb13565,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+        .lvgl = .{
+            .path = "../../../../embed-zig-pkgs/lvgl",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+    },
+}

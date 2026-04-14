@@ -1,0 +1,4 @@
+#ifndef COMPAT_TESTS_APP_LV_CONF_H
+#define COMPAT_TESTS_APP_LV_CONF_H
+
+#endif

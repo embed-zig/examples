@@ -1,0 +1,10 @@
+#ifndef COMPAT_TESTS_APP_OPUS_CONFIG_H
+#define COMPAT_TESTS_APP_OPUS_CONFIG_H
+
+#define FIXED_POINT 1
+#define OPUS_BUILD 1
+#define USE_ALLOCA 1
+#define HAVE_LRINT 1
+#define HAVE_LRINTF 1
+
+#endif

@@ -1,0 +1,22 @@
+.{
+    .name = .unit_test_ledstrip_animator,
+    .version = "0.1.0",
+    .fingerprint = 0xbc0faf32eb4c1d81,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+    },
+}

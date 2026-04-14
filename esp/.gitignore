@@ -1,0 +1,6 @@
+.build/
+.matrix/
+
+*.elf
+*.bin
+*.o

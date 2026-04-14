@@ -1,0 +1,22 @@
+.{
+    .name = .unit_test_at,
+    .version = "0.1.0",
+    .fingerprint = 0x9f7a90f7f795873e,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+    },
+}

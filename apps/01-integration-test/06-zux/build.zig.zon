@@ -1,0 +1,22 @@
+.{
+    .name = .integration_test_zux,
+    .version = "0.1.0",
+    .fingerprint = 0xc116590436115d37,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+    },
+}

@@ -1,0 +1,22 @@
+.{
+    .name = .integration_test_audio,
+    .version = "0.1.0",
+    .fingerprint = 0x5c3caf1d12d1713c,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+    },
+}

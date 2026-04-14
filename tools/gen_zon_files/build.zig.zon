@@ -1,0 +1,12 @@
+.{
+    .name = .gen_zon_files,
+    .version = "0.1.0",
+    .fingerprint = 0x0cb820e5f9f5bcae,
+    .minimum_zig_version = "0.15.2",
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "package.json",
+        "src",
+    },
+}

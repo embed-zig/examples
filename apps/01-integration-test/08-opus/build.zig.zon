@@ -1,0 +1,27 @@
+.{
+    .name = .integration_test_opus,
+    .version = "0.1.0",
+    .fingerprint = 0xc80006406c87c63c,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+        .opus = .{
+            .url = "https://codeload.github.com/embed-zig/opus/tar.gz/refs/tags/v0.1.0",
+            .hash = "opus-0.0.0-_e4RHoUbAQCgZNZLIrw_lKQl7Ym-N_3PiIAbFQupRbnn",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+        "opus_config.h",
+    },
+}

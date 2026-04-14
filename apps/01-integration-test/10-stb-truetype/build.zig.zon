@@ -1,0 +1,26 @@
+.{
+    .name = .integration_test_stb_truetype,
+    .version = "0.1.0",
+    .fingerprint = 0x1a3c016f00883d64,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .embed_zig = .{
+            .path = "../../../../embed-zig",
+        },
+        .stb_truetype = .{
+            .url = "https://codeload.github.com/embed-zig/stb-truetype/tar.gz/refs/tags/v0.1.0",
+            .hash = "stb_truetype-0.0.0-nMTGHyNzAwB5aBLUAzzUkOG3AeZrvNpRB6JzEF1et4f7",
+        },
+    },
+    .platforms = .{
+        "esp",
+        "macos",
+        "linux",
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+        "data",
+    },
+}
