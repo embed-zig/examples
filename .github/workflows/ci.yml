@@ -21,25 +21,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Clone sibling repos (app build.zig.zon path dependencies)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          sibling="$(dirname "${GITHUB_WORKSPACE}")"
-          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
-          echo "sibling=${sibling}"
-          auth_clone() {
-            local repo="$1"
-            local dest="$2"
-            shift 2
-            if [ ! -d "${dest}" ]; then
-              git clone --depth 1 "$@" "https://x-access-token:${GH_TOKEN}@github.com/${repo}.git" "${dest}"
-            fi
-          }
-          auth_clone embed-zig/embed-zig "${sibling}/embed-zig" --branch v1.0.0
-          auth_clone embed-zig/embed-zig-pkgs "${sibling}/embed-zig-pkgs"
-
       - name: Set up Zig
         uses: mlugg/setup-zig@v2
         with:
@@ -83,25 +64,6 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-
-      - name: Clone sibling repos (app build.zig.zon path dependencies)
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          sibling="$(dirname "${GITHUB_WORKSPACE}")"
-          echo "GITHUB_WORKSPACE=${GITHUB_WORKSPACE}"
-          echo "sibling=${sibling}"
-          auth_clone() {
-            local repo="$1"
-            local dest="$2"
-            shift 2
-            if [ ! -d "${dest}" ]; then
-              git clone --depth 1 "$@" "https://x-access-token:${GH_TOKEN}@github.com/${repo}.git" "${dest}"
-            fi
-          }
-          auth_clone embed-zig/embed-zig "${sibling}/embed-zig" --branch v1.0.0
-          auth_clone embed-zig/embed-zig-pkgs "${sibling}/embed-zig-pkgs"
 
       - name: Set up Zig
         uses: mlugg/setup-zig@v2

@@ -5,7 +5,8 @@
     .minimum_zig_version = "0.15.2",
     .dependencies = .{
         .embed_zig = .{
-            .path = "../../../../embed-zig",
+            .url = "https://codeload.github.com/embed-zig/embed-zig/tar.gz/refs/tags/v1.0.0",
+            .hash = "embed_zig-1.0.0-prAy_Mf7SwCqTYSGufoSyeo4iaS4XpZo5EdBfLvvx4Uq",
         },
         .stb_truetype = .{
             .url = "https://codeload.github.com/embed-zig/stb-truetype/tar.gz/refs/tags/v0.1.0",
