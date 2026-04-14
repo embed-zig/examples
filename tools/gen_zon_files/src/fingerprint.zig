@@ -1,4 +1,3 @@
-const builtin = @import("builtin");
 const std = @import("std");
 
 const fingerprint_marker = ".fingerprint = ";
@@ -37,20 +36,14 @@ fn fetchSuggestedFingerprint(
 ) !?[]u8 {
     const zig_exe = std.posix.getenv("ZIG") orelse "zig";
 
-    // `zig fetch /abs/path/to/huge-workspace` can fail on Linux CI with `error.NameTooLong` while
-    // staging into the global cache (destination paths get too long). Use `zig fetch .` with cwd
-    // set to the package, and prefer a short global cache prefix when unset (POSIX only).
-    var env_map = try std.process.getEnvMap(allocator);
-    defer env_map.deinit();
-    if (builtin.os.tag != .windows and env_map.get("ZIG_GLOBAL_CACHE_DIR") == null) {
-        try env_map.put("ZIG_GLOBAL_CACHE_DIR", "/tmp/zig-global-cache");
-    }
-
+    // `zig fetch` on a large workspace copies the tree into the global package cache and can hit
+    // `error.NameTooLong` on Linux CI. `zig build -h` loads `build.zig.zon`, validates the
+    // fingerprint, and exits without that copy; stderr still contains "use this value: ..." when
+    // the fingerprint is wrong.
     const result = try std.process.Child.run(.{
         .allocator = allocator,
-        .argv = &.{ zig_exe, "fetch", "." },
+        .argv = &.{ zig_exe, "build", "-h" },
         .cwd = package_abs_path,
-        .env_map = &env_map,
         .max_output_bytes = 1024 * 1024,
     });
     defer allocator.free(result.stdout);
@@ -67,7 +60,7 @@ fn fetchSuggestedFingerprint(
         return try allocator.dupe(u8, value);
     }
 
-    std.log.err("`{s} fetch .` (cwd {s}) failed\nstdout:\n{s}\nstderr:\n{s}", .{
+    std.log.err("`{s} build -h` (cwd {s}) failed\nstdout:\n{s}\nstderr:\n{s}", .{
         zig_exe,
         package_abs_path,
         result.stdout,
