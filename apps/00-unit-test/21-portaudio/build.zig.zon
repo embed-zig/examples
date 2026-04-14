@@ -16,6 +16,7 @@
     .platforms = .{
         "macos",
         "linux",
+        "windows",
     },
     .paths = .{
         "build.zig",

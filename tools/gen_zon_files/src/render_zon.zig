@@ -70,12 +70,11 @@ pub fn render(
     cfg: config.PackageJson,
     package_hashes: config.PackageHashes,
     apps: []const discover_apps.App,
-    host_platform: discover_apps.Platform,
 ) ![]u8 {
     var out = std.Io.Writer.Allocating.init(allocator);
     defer out.deinit();
 
-    try renderToWriter(allocator, &out.writer, variant, cfg, package_hashes, apps, host_platform);
+    try renderToWriter(allocator, &out.writer, variant, cfg, package_hashes, apps);
     const bytes = out.writer.buffered();
     return try allocator.dupe(u8, bytes);
 }
@@ -87,13 +86,8 @@ fn renderToWriter(
     cfg: config.PackageJson,
     package_hashes: config.PackageHashes,
     apps: []const discover_apps.App,
-    host_platform: discover_apps.Platform,
 ) !void {
     const spec = specFor(variant);
-    const target_platform = switch (variant) {
-        .root, .desktop => host_platform,
-        .esp => .esp,
-    };
 
     var serializer: std.zon.Serializer = .{
         .writer = writer,
@@ -117,7 +111,11 @@ fn renderToWriter(
         }
 
         for (apps) |app| {
-            if (!app.supportsPlatform(target_platform)) continue;
+            const include: bool = switch (variant) {
+                .root, .desktop => discover_apps.appSupportsAnyPlatform(app, &discover_apps.desktop_repo_platforms),
+                .esp => app.supportsPlatform(.esp),
+            };
+            if (!include) continue;
 
             var path_buf: [256]u8 = undefined;
             const dep_path = switch (variant) {

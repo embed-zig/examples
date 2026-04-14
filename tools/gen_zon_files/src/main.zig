@@ -56,8 +56,8 @@ pub fn main() !void {
     const apps = try discover_apps.scan(allocator, repo_dir);
     defer discover_apps.deinitApps(allocator, apps);
 
-    const host_platform = try discover_apps.hostDesktopPlatform();
-    std.log.info("discovered {d} apps; host desktop platform is {s}", .{ apps.len, @tagName(host_platform) });
+    const host_platform = discover_apps.hostDesktopPlatform();
+    std.log.info("discovered {d} apps; host desktop platform (log only) is {s}", .{ apps.len, @tagName(host_platform) });
 
     var package_hashes = try config.resolvePackageHashes(allocator, repo_dir, package_json.value, apps);
     defer package_hashes.deinit();
@@ -85,7 +85,7 @@ pub fn main() !void {
     defer allocator.free(desktop_stage_rel);
 
     std.log.info("rendering filtered app manifests", .{});
-    const root_manifest_bytes = try write_manifest.render(allocator, apps, host_platform);
+    const root_manifest_bytes = try write_manifest.renderSupportingAny(allocator, apps, &discover_apps.desktop_repo_platforms);
     defer allocator.free(root_manifest_bytes);
     try writeRepoFile(repo_dir, root_manifest_rel, root_manifest_bytes);
 
@@ -93,22 +93,22 @@ pub fn main() !void {
     defer allocator.free(esp_manifest_bytes);
     try writeRepoFile(repo_dir, esp_manifest_rel, esp_manifest_bytes);
 
-    const desktop_manifest_bytes = try write_manifest.render(allocator, apps, host_platform);
+    const desktop_manifest_bytes = try write_manifest.renderSupportingAny(allocator, apps, &discover_apps.desktop_repo_platforms);
     defer allocator.free(desktop_manifest_bytes);
     try writeRepoFile(repo_dir, desktop_manifest_rel, desktop_manifest_bytes);
 
     std.log.info("rendering root build.zig.zon", .{});
-    const root_zon = try render_zon.render(allocator, .root, package_json.value, package_hashes, apps, host_platform);
+    const root_zon = try render_zon.render(allocator, .root, package_json.value, package_hashes, apps);
     defer allocator.free(root_zon);
     try writeMirroredPackageOutput(allocator, repo_dir, root_stage_rel, "build.zig.zon", ".", root_zon);
 
     std.log.info("rendering esp/build.zig.zon", .{});
-    const esp_zon = try render_zon.render(allocator, .esp, package_json.value, package_hashes, apps, host_platform);
+    const esp_zon = try render_zon.render(allocator, .esp, package_json.value, package_hashes, apps);
     defer allocator.free(esp_zon);
     try writeMirroredPackageOutput(allocator, repo_dir, esp_stage_rel, "esp/build.zig.zon", "esp", esp_zon);
 
     std.log.info("rendering desktop/build.zig.zon", .{});
-    const desktop_zon = try render_zon.render(allocator, .desktop, package_json.value, package_hashes, apps, host_platform);
+    const desktop_zon = try render_zon.render(allocator, .desktop, package_json.value, package_hashes, apps);
     defer allocator.free(desktop_zon);
     try writeMirroredPackageOutput(allocator, repo_dir, desktop_stage_rel, "desktop/build.zig.zon", "desktop", desktop_zon);
 }

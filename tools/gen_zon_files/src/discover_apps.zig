@@ -24,18 +24,14 @@ pub const Platform = enum {
     esp,
     macos,
     linux,
-};
-
-const all_platforms = [_]Platform{
-    .esp,
-    .macos,
-    .linux,
+    windows,
 };
 
 const all_platform_names = [_][]const u8{
     "esp",
     "macos",
     "linux",
+    "windows",
 };
 
 pub const App = struct {
@@ -70,12 +66,24 @@ pub fn suffixAfterNumberDash(name: []const u8) ?[]const u8 {
     return name[i + 1 ..];
 }
 
-pub fn hostDesktopPlatform() !Platform {
+/// Host desktop OS for logging. Generation of committed root/desktop artifacts uses
+/// `desktop_repo_platforms` so output matches across macOS, Linux, and Windows CI.
+pub fn hostDesktopPlatform() Platform {
     return switch (builtin.os.tag) {
         .macos => .macos,
         .linux => .linux,
-        else => error.UnsupportedHostPlatform,
+        .windows => .windows,
+        else => .linux,
     };
+}
+
+pub const desktop_repo_platforms = [_]Platform{ .macos, .linux, .windows };
+
+pub fn appSupportsAnyPlatform(app: App, platforms: []const Platform) bool {
+    for (platforms) |p| {
+        if (app.supportsPlatform(p)) return true;
+    }
+    return false;
 }
 
 pub fn scan(allocator: std.mem.Allocator, repo_dir: std.fs.Dir) ![]App {

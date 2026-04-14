@@ -4,7 +4,7 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
     const os_tag = target.result.os.tag;
-    const supports_portaudio = os_tag == .macos or os_tag == .linux;
+    const supports_portaudio = os_tag == .macos or os_tag == .linux or os_tag == .windows;
     const embed_dep = b.dependency("embed_zig", .{
         .target = target,
         .optimize = optimize,

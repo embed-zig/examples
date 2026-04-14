@@ -6,6 +6,15 @@ pub fn render(
     apps: []const discover_apps.App,
     platform: discover_apps.Platform,
 ) ![]u8 {
+    return renderSupportingAny(allocator, apps, &.{platform});
+}
+
+/// Include an app if it supports at least one of `platforms` (e.g. macos, linux, windows for stable CI).
+pub fn renderSupportingAny(
+    allocator: std.mem.Allocator,
+    apps: []const discover_apps.App,
+    platforms: []const discover_apps.Platform,
+) ![]u8 {
     var out = std.Io.Writer.Allocating.init(allocator);
     defer out.deinit();
 
@@ -13,7 +22,7 @@ pub fn render(
     var emitted: usize = 0;
     for (apps, 0..) |app, idx| {
         _ = idx;
-        if (!app.supportsPlatform(platform)) continue;
+        if (!discover_apps.appSupportsAnyPlatform(app, platforms)) continue;
 
         if (emitted == 0) {
             try out.writer.writeAll("\n");
