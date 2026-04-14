@@ -39,7 +39,8 @@ pub fn resolveHashFromUrl(
     allocator: std.mem.Allocator,
     url: []const u8,
 ) ![]u8 {
-    const zig_exe = std.posix.getenv("ZIG") orelse "zig";
+    const zig_exe = try getZigExeOwned(allocator);
+    defer allocator.free(zig_exe);
     const result = try std.process.Child.run(.{
         .allocator = allocator,
         .argv = &.{ zig_exe, "fetch", url },
@@ -66,6 +67,13 @@ pub fn resolveHashFromUrl(
     const trimmed = std.mem.trim(u8, result.stdout, " \t\r\n");
     if (trimmed.len == 0) return error.ZigFetchFailed;
     return allocator.dupe(u8, trimmed);
+}
+
+fn getZigExeOwned(allocator: std.mem.Allocator) ![]u8 {
+    return std.process.getEnvVarOwned(allocator, "ZIG") catch |err| switch (err) {
+        error.EnvironmentVariableNotFound => allocator.dupe(u8, "zig"),
+        else => err,
+    };
 }
 
 pub const ResolvedRemoteDep = struct {

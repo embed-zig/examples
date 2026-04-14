@@ -34,7 +34,8 @@ fn fetchSuggestedFingerprint(
     allocator: std.mem.Allocator,
     package_abs_path: []const u8,
 ) !?[]u8 {
-    const zig_exe = std.posix.getenv("ZIG") orelse "zig";
+    const zig_exe = try getZigExeOwned(allocator);
+    defer allocator.free(zig_exe);
 
     // `zig fetch` on a large workspace copies the tree into the global package cache and can hit
     // `error.NameTooLong` on Linux CI. `zig build -h` loads `build.zig.zon`, validates the
@@ -67,6 +68,13 @@ fn fetchSuggestedFingerprint(
         result.stderr,
     });
     return error.ZigFetchFailed;
+}
+
+fn getZigExeOwned(allocator: std.mem.Allocator) ![]u8 {
+    return std.process.getEnvVarOwned(allocator, "ZIG") catch |err| switch (err) {
+        error.EnvironmentVariableNotFound => allocator.dupe(u8, "zig"),
+        else => err,
+    };
 }
 
 fn extractSuggestedFingerprint(stderr: []const u8) ?[]const u8 {
