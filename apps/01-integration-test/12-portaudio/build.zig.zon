@@ -7,6 +7,10 @@
         .embed_zig = .{
             .path = "../../../../embed-zig",
         },
+        .portaudio = .{
+            .url = "https://codeload.github.com/embed-zig/portaudio/tar.gz/refs/tags/v0.1.0",
+            .hash = "portaudio-0.1.0-HZ8ifbtWAQCPGhotKHnLxxpjwxvk6A7WbHDJ0SHGTqIu",
+        },
     },
     .platforms = .{
         "macos",

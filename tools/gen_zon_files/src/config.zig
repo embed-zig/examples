@@ -17,6 +17,7 @@ pub const PackageJson = struct {
         lvgl: []const u8,
         speexdsp: []const u8,
         opus: []const u8,
+        portaudio: []const u8,
         @"stb-truetype": []const u8,
     };
 };

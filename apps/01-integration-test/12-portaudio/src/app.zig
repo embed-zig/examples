@@ -14,7 +14,7 @@ pub fn run(comptime runtime: type) !void {
     defer runner.deinit();
 
     runner.timeout(480 * std.time.ns_per_s);
-    runner.run("portaudio/integration", portaudio.test_runner.portaudio.make(std));
+    runner.run("portaudio/integration", portaudio.test_runner.integration.make(std));
 
     const passed = runner.wait();
     app_log.info("portaudio integration runner finished", .{});

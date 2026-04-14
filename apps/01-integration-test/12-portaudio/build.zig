@@ -8,8 +8,14 @@ pub fn build(b: *std.Build) void {
     const embed_dep = b.dependency("embed_zig", .{
         .target = target,
         .optimize = optimize,
-        .portaudio = supports_portaudio,
     });
+    const portaudio_dep = if (supports_portaudio)
+        b.dependency("portaudio", .{
+            .target = target,
+            .optimize = optimize,
+        })
+    else
+        null;
 
     const app_mod = b.addModule("app", .{
         .root_source_file = if (supports_portaudio)
@@ -20,8 +26,8 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .imports = if (supports_portaudio)
             &.{
-                .{ .name = "portaudio", .module = embed_dep.module("portaudio") },
-                .{ .name = "testing", .module = embed_dep.module("testing") },
+                .{ .name = "portaudio", .module = portaudio_dep.?.module("portaudio") },
+                .{ .name = "testing", .module = portaudio_dep.?.module("testing") },
             }
         else
             &.{
