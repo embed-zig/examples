@@ -10,7 +10,7 @@
         },
         .stb_truetype = .{
             .url = "https://codeload.github.com/embed-zig/stb-truetype/tar.gz/refs/tags/v0.1.0",
-            .hash = "stb_truetype-0.0.0-nMTGHyNzAwB5aBLUAzzUkOG3AeZrvNpRB6JzEF1et4f7",
+            .hash = "stb_truetype-0.1.0-nMTGHw1zAwBcOLvlj4spMSX-EmbaJ2rv-NY3byM4fvDv",
         },
     },
     .platforms = .{

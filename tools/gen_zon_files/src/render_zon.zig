@@ -68,24 +68,24 @@ pub fn render(
     allocator: std.mem.Allocator,
     variant: Variant,
     cfg: config.PackageJson,
-    remote_hashes: config.RemoteHashes,
+    package_hashes: config.PackageHashes,
     apps: []const discover_apps.App,
     host_platform: discover_apps.Platform,
 ) ![]u8 {
     var out = std.Io.Writer.Allocating.init(allocator);
     defer out.deinit();
 
-    try renderToWriter(allocator, &out.writer, variant, cfg, remote_hashes, apps, host_platform);
+    try renderToWriter(allocator, &out.writer, variant, cfg, package_hashes, apps, host_platform);
     const bytes = out.writer.buffered();
     return try allocator.dupe(u8, bytes);
 }
 
 fn renderToWriter(
-    allocator: std.mem.Allocator,
+    _: std.mem.Allocator,
     writer: *std.Io.Writer,
     variant: Variant,
     cfg: config.PackageJson,
-    remote_hashes: config.RemoteHashes,
+    package_hashes: config.PackageHashes,
     apps: []const discover_apps.App,
     host_platform: discover_apps.Platform,
 ) !void {
@@ -110,12 +110,9 @@ fn renderToWriter(
         var deps = try root.beginStructField("dependencies", .{});
 
         if (spec.include_embed_dependency) {
-            const embed_dep_spec = try config.parseDependencySpec(cfg.dependencies.@"embed-zig");
-            const embed_url = try config.remoteUrlForDependencySpec(allocator, "embed-zig", embed_dep_spec);
-            defer allocator.free(embed_url);
             try deps.field("embed_zig", .{
-                .url = embed_url,
-                .hash = remote_hashes.embed_zig,
+                .url = package_hashes.embed_zig.url,
+                .hash = package_hashes.embed_zig.hash,
             }, .{});
         }
 
@@ -131,12 +128,9 @@ fn renderToWriter(
         }
 
         if (spec.include_esp_dependency) {
-            const esp_dep_spec = try config.parseDependencySpec(cfg.dependencies.esp);
-            const esp_url = try config.remoteUrlForDependencySpec(allocator, "esp", esp_dep_spec);
-            defer allocator.free(esp_url);
             try deps.field("esp", .{
-                .url = esp_url,
-                .hash = remote_hashes.esp,
+                .url = package_hashes.esp.url,
+                .hash = package_hashes.esp.hash,
             }, .{});
         }
 

@@ -10,7 +10,7 @@
         },
         .opus = .{
             .url = "https://codeload.github.com/embed-zig/opus/tar.gz/refs/tags/v0.1.0",
-            .hash = "opus-0.0.0-_e4RHoUbAQCgZNZLIrw_lKQl7Ym-N_3PiIAbFQupRbnn",
+            .hash = "opus-0.1.0-_e4RHqgBAQBU65OBYY1uHhMT38zsGALDs-KpYPttTJsx",
         },
     },
     .platforms = .{

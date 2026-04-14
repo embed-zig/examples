@@ -1,4 +1,5 @@
 const std = @import("std");
+const discover_apps = @import("discover_apps.zig");
 
 pub const PackageJson = struct {
     name: []const u8,
@@ -67,109 +68,191 @@ pub fn resolveHashFromUrl(
     return allocator.dupe(u8, trimmed);
 }
 
-pub const RemoteHashes = struct {
-    allocator: std.mem.Allocator,
-    embed_zig: []u8,
-    esp: []u8,
+pub const ResolvedRemoteDep = struct {
+    url: []u8,
+    hash: []u8,
+};
 
-    pub fn deinit(self: *RemoteHashes) void {
-        self.allocator.free(self.embed_zig);
-        self.allocator.free(self.esp);
+/// Canonical tarball URL + Zig package hash for every remote dependency in `package.json`.
+pub const PackageHashes = struct {
+    allocator: std.mem.Allocator,
+    embed_zig: ResolvedRemoteDep,
+    esp: ResolvedRemoteDep,
+    lvgl: ResolvedRemoteDep,
+    speexdsp: ResolvedRemoteDep,
+    opus: ResolvedRemoteDep,
+    portaudio: ResolvedRemoteDep,
+    stb_truetype: ResolvedRemoteDep,
+
+    pub fn deinit(self: *PackageHashes) void {
+        self.allocator.free(self.embed_zig.url);
+        self.allocator.free(self.embed_zig.hash);
+        self.allocator.free(self.esp.url);
+        self.allocator.free(self.esp.hash);
+        self.allocator.free(self.lvgl.url);
+        self.allocator.free(self.lvgl.hash);
+        self.allocator.free(self.speexdsp.url);
+        self.allocator.free(self.speexdsp.hash);
+        self.allocator.free(self.opus.url);
+        self.allocator.free(self.opus.hash);
+        self.allocator.free(self.portaudio.url);
+        self.allocator.free(self.portaudio.hash);
+        self.allocator.free(self.stb_truetype.url);
+        self.allocator.free(self.stb_truetype.hash);
     }
 };
 
-pub fn resolveRemoteHashes(
+pub fn resolvePackageHashes(
     allocator: std.mem.Allocator,
     repo_dir: std.fs.Dir,
     cfg: PackageJson,
-) !RemoteHashes {
-    std.log.info("resolving remote dependency hashes", .{});
-    const embed_dep_spec = try parseDependencySpec(cfg.dependencies.@"embed-zig");
-    const embed_url = try remoteUrlForDependencySpec(allocator, "embed-zig", embed_dep_spec);
-    defer allocator.free(embed_url);
+    apps: []const discover_apps.App,
+) !PackageHashes {
+    std.log.info("resolving remote dependency URLs and hashes from package.json", .{});
 
-    const esp_dep_spec = try parseDependencySpec(cfg.dependencies.esp);
-    const esp_url = try remoteUrlForDependencySpec(allocator, "esp", esp_dep_spec);
-    defer allocator.free(esp_url);
+    const embed_zig = try resolveRemoteDep(allocator, repo_dir, apps, "embed-zig", cfg.dependencies.@"embed-zig");
+    errdefer {
+        allocator.free(embed_zig.url);
+        allocator.free(embed_zig.hash);
+    }
+    const esp = try resolveRemoteDep(allocator, repo_dir, apps, "esp", cfg.dependencies.esp);
+    errdefer {
+        allocator.free(esp.url);
+        allocator.free(esp.hash);
+    }
+    const lvgl = try resolveRemoteDep(allocator, repo_dir, apps, "lvgl", cfg.dependencies.lvgl);
+    errdefer {
+        allocator.free(lvgl.url);
+        allocator.free(lvgl.hash);
+    }
+    const speexdsp = try resolveRemoteDep(allocator, repo_dir, apps, "speexdsp", cfg.dependencies.speexdsp);
+    errdefer {
+        allocator.free(speexdsp.url);
+        allocator.free(speexdsp.hash);
+    }
+    const opus = try resolveRemoteDep(allocator, repo_dir, apps, "opus", cfg.dependencies.opus);
+    errdefer {
+        allocator.free(opus.url);
+        allocator.free(opus.hash);
+    }
+    const portaudio = try resolveRemoteDep(allocator, repo_dir, apps, "portaudio", cfg.dependencies.portaudio);
+    errdefer {
+        allocator.free(portaudio.url);
+        allocator.free(portaudio.hash);
+    }
+    const stb_truetype = try resolveRemoteDep(allocator, repo_dir, apps, "stb-truetype", cfg.dependencies.@"stb-truetype");
+    errdefer {
+        allocator.free(stb_truetype.url);
+        allocator.free(stb_truetype.hash);
+    }
 
     return .{
         .allocator = allocator,
-        .embed_zig = try resolveHashFromRepoOrUrl(allocator, repo_dir, .embed_zig, embed_url),
-        .esp = try resolveHashFromRepoOrUrl(allocator, repo_dir, .esp, esp_url),
+        .embed_zig = embed_zig,
+        .esp = esp,
+        .lvgl = lvgl,
+        .speexdsp = speexdsp,
+        .opus = opus,
+        .portaudio = portaudio,
+        .stb_truetype = stb_truetype,
     };
 }
 
-const RemoteDepKey = enum {
-    embed_zig,
-    esp,
-};
-
-const RemoteManifest = struct {
-    dependencies: Dependencies = .{},
-
-    const Dependencies = struct {
-        embed_zig: ?RemoteDependency = null,
-        esp: ?RemoteDependency = null,
-    };
-
-    const RemoteDependency = struct {
-        url: []const u8 = "",
-        hash: []const u8 = "",
-    };
-};
-
-fn resolveHashFromRepoOrUrl(
+fn resolveRemoteDep(
     allocator: std.mem.Allocator,
     repo_dir: std.fs.Dir,
-    dep_key: RemoteDepKey,
-    url: []const u8,
-) ![]u8 {
+    apps: []const discover_apps.App,
+    dep_name: []const u8,
+    spec_str: []const u8,
+) !ResolvedRemoteDep {
+    const spec = try parseDependencySpec(spec_str);
+    const url = try remoteUrlForDependencySpec(allocator, dep_name, spec);
+    errdefer allocator.free(url);
+
+    if (try lookupHashForUrlInRepo(allocator, repo_dir, url, apps)) |hash| {
+        std.log.info("reusing {s} hash from committed build.zig.zon (url matches package.json)", .{dep_name});
+        return .{ .url = url, .hash = hash };
+    }
+    std.log.info("fetching {s} hash via zig fetch", .{dep_name});
+    const hash = try resolveHashFromUrl(allocator, url);
+    return .{ .url = url, .hash = hash };
+}
+
+const url_needle = ".url = \"";
+const hash_needle = ".hash = \"";
+
+/// If any of `build.zig.zon`, `esp/build.zig.zon`, or `desktop/build.zig.zon` contains the exact
+/// tarball `url`, returns a copy of the following `.hash` value (avoids redundant `zig fetch`).
+pub fn lookupHashForUrlInRepo(
+    allocator: std.mem.Allocator,
+    repo_dir: std.fs.Dir,
+    want_url: []const u8,
+    apps: []const discover_apps.App,
+) !?[]u8 {
     const manifest_paths = [_][]const u8{
         "build.zig.zon",
         "esp/build.zig.zon",
         "desktop/build.zig.zon",
     };
-    for (manifest_paths) |manifest_rel_path| {
-        if (try lookupHashInManifest(allocator, repo_dir, manifest_rel_path, dep_key, url)) |hash| {
-            std.log.info("using cached {s} hash from {s}", .{ @tagName(dep_key), manifest_rel_path });
-            return hash;
-        }
+    for (manifest_paths) |rel| {
+        var file = repo_dir.openFile(rel, .{}) catch |err| switch (err) {
+            error.FileNotFound => continue,
+            else => return err,
+        };
+        defer file.close();
+
+        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        defer arena.deinit();
+        const bytes = try file.readToEndAlloc(arena.allocator(), 1024 * 1024);
+
+        if (try lookupHashForUrlInBytes(allocator, bytes, want_url)) |h| return h;
     }
-    std.log.info("fetching {s} hash from {s}", .{ @tagName(dep_key), url });
-    return resolveHashFromUrl(allocator, url);
+
+    for (apps) |app| {
+        const rel_path = try std.fmt.allocPrint(allocator, "{s}/build.zig.zon", .{app.root_path});
+        defer allocator.free(rel_path);
+
+        var file = repo_dir.openFile(rel_path, .{}) catch |err| switch (err) {
+            error.FileNotFound => continue,
+            else => return err,
+        };
+        defer file.close();
+
+        var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
+        defer arena.deinit();
+        const bytes = try file.readToEndAlloc(arena.allocator(), 1024 * 1024);
+
+        if (try lookupHashForUrlInBytes(allocator, bytes, want_url)) |h| return h;
+    }
+    return null;
 }
 
-fn lookupHashInManifest(
+fn lookupHashForUrlInBytes(
     allocator: std.mem.Allocator,
-    repo_dir: std.fs.Dir,
-    manifest_rel_path: []const u8,
-    dep_key: RemoteDepKey,
-    url: []const u8,
+    bytes: []const u8,
+    want_url: []const u8,
 ) !?[]u8 {
-    var file = repo_dir.openFile(manifest_rel_path, .{}) catch |err| switch (err) {
-        error.FileNotFound => return null,
-        else => return err,
-    };
-    defer file.close();
+    var pos: usize = 0;
+    while (pos < bytes.len) {
+        const u = std.mem.indexOfPos(u8, bytes, pos, url_needle) orelse break;
+        const url_start = u + url_needle.len;
+        if (url_start >= bytes.len) return null;
+        const url_end = std.mem.indexOfScalarPos(u8, bytes, url_start, '"') orelse return null;
+        const url = bytes[url_start..url_end];
 
-    var arena = std.heap.ArenaAllocator.init(std.heap.page_allocator);
-    defer arena.deinit();
-    const arena_alloc = arena.allocator();
+        const h = std.mem.indexOfPos(u8, bytes, url_end, hash_needle) orelse {
+            pos = url_end;
+            continue;
+        };
+        const hash_start = h + hash_needle.len;
+        const hash_end = std.mem.indexOfScalarPos(u8, bytes, hash_start, '"') orelse return null;
 
-    const bytes = try file.readToEndAlloc(arena_alloc, 1024 * 1024);
-    const source = try arena_alloc.dupeZ(u8, bytes);
-    const parsed = try std.zon.parse.fromSlice(RemoteManifest, arena_alloc, source, null, .{
-        .ignore_unknown_fields = true,
-    });
-
-    const maybe_dep = switch (dep_key) {
-        .embed_zig => parsed.dependencies.embed_zig,
-        .esp => parsed.dependencies.esp,
-    };
-    const dep = maybe_dep orelse return null;
-    if (!std.mem.eql(u8, dep.url, url)) return null;
-    if (dep.hash.len == 0) return null;
-    return try allocator.dupe(u8, dep.hash);
+        if (std.mem.eql(u8, url, want_url)) {
+            return try allocator.dupe(u8, bytes[hash_start..hash_end]);
+        }
+        pos = hash_end;
+    }
+    return null;
 }
 
 pub const DependencySpec = union(enum) {

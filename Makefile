@@ -1,6 +1,9 @@
 # Build and run the standalone Zig ZON generator.
 # The generator installs its binary under `.build/gen_zon_files/` and writes staged outputs under
 # `.build/`, then mirrors package `build.zig.zon` files into their package roots.
+# Remote dependency `.url` / `.hash` for apps and for root/esp/desktop `build.zig.zon` come from
+# `tools/gen_zon_files/package.json` (with `zig fetch` only when no committed zon lists the same URL).
+# It also updates package `.fingerprint` values where Zig suggests a change.
 
 .DEFAULT_GOAL := all
 
