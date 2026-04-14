@@ -141,7 +141,23 @@ fn writeMirroredPackageOutput(
     package_rel_path: []const u8,
     bytes: []const u8,
 ) !void {
+    const existing_mirror_bytes = readRepoFileAlloc(allocator, repo_dir, mirror_rel_path) catch |err| switch (err) {
+        error.FileNotFound => null,
+        else => return err,
+    };
+    defer if (existing_mirror_bytes) |value| allocator.free(value);
+    const mirror_unchanged = if (existing_mirror_bytes) |value|
+        std.mem.eql(u8, value, bytes)
+    else
+        false;
+
     try writeMirroredOutput(repo_dir, stage_rel_path, mirror_rel_path, bytes);
+    if (mirror_unchanged) {
+        std.log.info("skipping package fingerprint refresh for {s}; manifest bytes unchanged", .{
+            package_rel_path,
+        });
+        return;
+    }
     std.log.info("refreshing package fingerprint for {s}", .{package_rel_path});
     try fingerprint.refreshPackageManifest(allocator, repo_dir, package_rel_path);
 

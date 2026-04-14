@@ -1,6 +1,6 @@
 # embed-zig examples
 
-[CI](https://github.com/embed-zig/examples/actions/workflows/ci.yml)
+[![CI](https://github.com/embed-zig/examples/actions/workflows/ci.yml/badge.svg)](https://github.com/embed-zig/examples/actions/workflows/ci.yml)
 
 Host-side example apps and integration tests for [embed-zig](https://github.com/embed-zig/embed-zig). Generated manifests and `build.zig.zon` files are produced by `make` (see `tools/gen_zon_files/`).
 
