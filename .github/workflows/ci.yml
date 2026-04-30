@@ -14,44 +14,8 @@ permissions:
   contents: read
 
 jobs:
-  zon-check:
-    name: zon-check
-    runs-on: ubuntu-24.04-arm
-    defaults:
-      run:
-        shell: bash
-
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Zig
-        uses: mlugg/setup-zig@v2
-        with:
-          version: 0.15.2
-
-      - name: Show tool versions
-        run: |
-          zig version
-          make --version
-
-      - name: Run zon generation
-        run: make
-
-      - name: Verify generated zon files are committed
-        run: |
-          status="$(git status --short --untracked-files=no)"
-          if [ -n "$status" ]; then
-            echo "Tracked files changed after 'make':"
-            printf '%s\n' "$status"
-            echo
-            git diff --stat
-            exit 1
-          fi
-
   test:
     name: test (${{ matrix.os }})
-    needs: zon-check
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -78,18 +42,8 @@ jobs:
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y libasound2-dev
 
-      - name: Install make on Windows
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: choco install make -y
-
       - name: Show tool versions
-        run: |
-          zig version
-          make --version
-
-      - name: Generate manifests for tests
-        run: make
+        run: zig version
 
       - name: Run package tests
         run: zig build test

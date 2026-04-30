@@ -9,13 +9,6 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    const portaudio_dep = if (supports_portaudio)
-        b.dependency("portaudio", .{
-            .target = target,
-            .optimize = optimize,
-        })
-    else
-        null;
 
     const app_mod = b.addModule("app", .{
         .root_source_file = if (supports_portaudio)
@@ -26,12 +19,16 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
         .imports = if (supports_portaudio)
             &.{
-                .{ .name = "portaudio", .module = portaudio_dep.?.module("portaudio") },
-                .{ .name = "testing", .module = portaudio_dep.?.module("testing") },
+                .{ .name = "glib", .module = embed_dep.module("glib") },
+                .{ .name = "embed", .module = embed_dep.module("embed") },
+                .{ .name = "gstd", .module = embed_dep.module("gstd") },
+                .{ .name = "portaudio", .module = embed_dep.module("portaudio") },
             }
         else
             &.{
-                .{ .name = "testing", .module = embed_dep.module("testing") },
+                .{ .name = "glib", .module = embed_dep.module("glib") },
+                .{ .name = "embed", .module = embed_dep.module("embed") },
+                .{ .name = "gstd", .module = embed_dep.module("gstd") },
             },
     });
 

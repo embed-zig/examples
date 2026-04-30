@@ -1,4 +1,4 @@
-const display_api = @import("drivers");
+const display_api = @import("embed").drivers;
 
 x: u16,
 y: u16,

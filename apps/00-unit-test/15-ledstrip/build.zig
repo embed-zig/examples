@@ -13,14 +13,13 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
         .imports = &.{
-            .{ .name = "ledstrip", .module = embed_dep.module("ledstrip") },
-            .{ .name = "testing", .module = embed_dep.module("testing") },
+            .{ .name = "glib", .module = embed_dep.module("glib") },
+            .{ .name = "embed", .module = embed_dep.module("embed") },
+            .{ .name = "gstd", .module = embed_dep.module("gstd") },
         },
     });
 
-    const tests = b.addTest(.{
-        .root_module = app_mod,
-    });
+    const tests = b.addTest(.{ .root_module = app_mod });
     const run_tests = b.addRunArtifact(tests);
 
     const test_step = b.step("test", "Run host tests for unit-test-ledstrip");

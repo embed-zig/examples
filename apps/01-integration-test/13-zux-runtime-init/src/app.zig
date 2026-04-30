@@ -1,8 +1,9 @@
-const drivers = @import("drivers");
-const zux = @import("zux");
+const glib = @import("glib");
+const drivers = @import("embed").drivers;
+const zux = @import("embed").zux;
 
-fn makeBuiltApp(comptime lib: type, comptime Channel: fn (type) type) type {
-    const AssemblerType = zux.Assembler.make(lib, .{}, Channel);
+fn makeBuiltApp(comptime grt: type) type {
+    const AssemblerType = zux.assemble(grt, .{});
     var assembler = AssemblerType.init();
     assembler.addSingleButton(.buttons, 7);
     assembler.setState("ui/button", .{.buttons});
@@ -14,19 +15,27 @@ fn makeBuiltApp(comptime lib: type, comptime Channel: fn (type) type) type {
     return assembler.build(build_config);
 }
 
-pub fn run(comptime runtime: type) !void {
-    const BuiltApp = comptime makeBuiltApp(runtime.std, runtime.Channel);
+pub fn run(comptime ctx: type, comptime grt: type) !void {
+    comptime {
+        if (!glib.runtime.is(grt)) @compileError("grt must be a glib runtime namespace");
+    }
+
+    const BuiltApp = comptime makeBuiltApp(grt);
+
+    try ctx.setup();
+    defer ctx.teardown();
 
     // Smallest known repro: Xtensa LLVM crashes while lowering this init path
     // in optimized builds, even before the value is used at runtime.
     var app = try BuiltApp.init(.{
-        .allocator = runtime.allocator,
+        .allocator = ctx.allocator,
         .buttons = undefined,
     });
     _ = &app;
 }
 
 test "compile_for_host" {
-    const embed_std = @import("embed_std");
-    _ = comptime makeBuiltApp(embed_std.std, embed_std.sync.Channel);
+    const gstd = @import("gstd");
+
+    _ = comptime makeBuiltApp(gstd.runtime);
 }

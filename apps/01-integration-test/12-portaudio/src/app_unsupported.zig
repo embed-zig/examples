@@ -1,22 +1,28 @@
-pub fn run(comptime runtime: type) !void {
-    const std = runtime.std;
-    const app_log = std.log.scoped(.compat_tests);
+const glib = @import("glib");
+pub fn run(comptime ctx: type, comptime grt: type) !void {
+    comptime {
+        if (!glib.runtime.is(grt)) @compileError("grt must be a glib runtime namespace");
+    }
 
-    try runtime.setup();
-    defer runtime.teardown();
+    const log = grt.std.log.scoped(.compat_tests);
 
-    app_log.info("skipping portaudio integration runner on unsupported target", .{});
+    try ctx.setup();
+    defer ctx.teardown();
+
+    log.info("skipping portaudio integration runner on unsupported target", .{});
 }
 
 test run {
-    @import("std").testing.log_level = .info;
+    const std = @import("std");
+    const gstd = @import("gstd");
 
-    const HostRuntime = struct {
-        pub const std = @import("std");
+    std.testing.log_level = .info;
+
+    const TestContext = struct {
+        pub const allocator = std.testing.allocator;
 
         pub fn setup() !void {}
         pub fn teardown() void {}
     };
-
-    try run(HostRuntime);
+    try run(TestContext, gstd.runtime);
 }

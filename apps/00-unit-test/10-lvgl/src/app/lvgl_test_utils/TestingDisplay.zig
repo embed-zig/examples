@@ -1,7 +1,6 @@
 const std = @import("std");
-const embed = @import("embed");
-const testing_api = @import("testing");
-const display_api = @import("drivers");
+const testing_api = @import("glib").testing;
+const display_api = @import("embed").drivers;
 const display_error = @import("Error.zig");
 const DrawArgsType = @import("DrawArgs.zig");
 const ComparerType = @import("Comparer.zig");
@@ -219,14 +218,14 @@ fn addDefaultTestCaseResult(
     try testing_display.addTestCaseResult(case_index, &pixels, comparer);
 }
 
-pub fn TestRunner(comptime lib: type) testing_api.TestRunner {
+pub fn TestRunner(comptime grt: type) testing_api.TestRunner {
     const Runner = struct {
-        pub fn init(self: *@This(), allocator: embed.mem.Allocator) !void {
+        pub fn init(self: *@This(), allocator: std.mem.Allocator) !void {
             _ = self;
             _ = allocator;
         }
 
-        pub fn run(self: *@This(), t: *testing_api.T, allocator: embed.mem.Allocator) bool {
+        pub fn run(self: *@This(), t: *testing_api.T, allocator: std.mem.Allocator) bool {
             _ = self;
 
             const Cases = struct {
@@ -240,8 +239,8 @@ pub fn TestRunner(comptime lib: type) testing_api.TestRunner {
 
                     var output = try testing_display.display();
                     defer output.deinit();
-                    try lib.testing.expectEqual(@as(u16, 8), output.width());
-                    try lib.testing.expectEqual(@as(u16, 4), output.height());
+                    try grt.std.testing.expectEqual(@as(u16, 8), output.width());
+                    try grt.std.testing.expectEqual(@as(u16, 4), output.height());
                     try output.drawBitmap(1, 1, 2, 2, &pixels);
                     try testing_display.assertComplete();
                 }
@@ -261,9 +260,9 @@ pub fn TestRunner(comptime lib: type) testing_api.TestRunner {
 
                     var output = try testing_display.display();
                     defer output.deinit();
-                    try lib.testing.expectError(error.DisplayError, output.drawBitmap(1, 1, 2, 2, &actual));
-                    try lib.testing.expectEqual(@as(?Error, error.DrawPixelsMismatch), testing_display.pendingFailure());
-                    try lib.testing.expectError(error.DrawPixelsMismatch, testing_display.assertComplete());
+                    try grt.std.testing.expectError(error.DisplayError, output.drawBitmap(1, 1, 2, 2, &actual));
+                    try grt.std.testing.expectEqual(@as(?Error, error.DrawPixelsMismatch), testing_display.pendingFailure());
+                    try grt.std.testing.expectError(error.DrawPixelsMismatch, testing_display.assertComplete());
                 }
 
                 fn pipeComparerRunsComparersInOrderOnOneDraw(alloc: std.mem.Allocator) !void {
@@ -350,8 +349,8 @@ pub fn TestRunner(comptime lib: type) testing_api.TestRunner {
 
                     var output = try testing_display.display();
                     defer output.deinit();
-                    try lib.testing.expectError(error.Timeout, output.drawBitmap(1, 1, 2, 2, &actual));
-                    try lib.testing.expectError(error.Timeout, testing_display.assertComplete());
+                    try grt.std.testing.expectError(error.Timeout, output.drawBitmap(1, 1, 2, 2, &actual));
+                    try grt.std.testing.expectError(error.Timeout, testing_display.assertComplete());
                 }
             };
 
@@ -383,13 +382,13 @@ pub fn TestRunner(comptime lib: type) testing_api.TestRunner {
             return true;
         }
 
-        pub fn deinit(self: *@This(), allocator: embed.mem.Allocator) void {
+        pub fn deinit(self: *@This(), allocator: std.mem.Allocator) void {
             _ = allocator;
-            lib.testing.allocator.destroy(self);
+            std.heap.page_allocator.destroy(self);
         }
     };
 
-    const runner = lib.testing.allocator.create(Runner) catch @panic("OOM");
+    const runner = std.heap.page_allocator.create(Runner) catch @panic("OOM");
     runner.* = .{};
     return testing_api.TestRunner.make(Runner).new(runner);
 }

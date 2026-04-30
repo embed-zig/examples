@@ -1,50 +1,50 @@
-const embed = @import("embed");
+const std = @import("std");
 const lvgl = @import("lvgl");
-const testing = @import("testing");
+const testing = @import("glib").testing;
 const TestingDisplay = @import("lvgl_test_utils/TestingDisplay.zig");
 
-pub fn make(comptime lib: type) testing.TestRunner {
+pub fn make(comptime grt: type) testing.TestRunner {
     const Runner = struct {
-        pub fn init(self: *@This(), allocator: embed.mem.Allocator) !void {
+        pub fn init(self: *@This(), allocator: std.mem.Allocator) !void {
             _ = self;
             _ = allocator;
         }
 
-        pub fn run(self: *@This(), t: *testing.T, allocator: embed.mem.Allocator) bool {
+        pub fn run(self: *@This(), t: *testing.T, allocator: std.mem.Allocator) bool {
             _ = self;
             _ = allocator;
 
-            t.run("binding", lvgl.binding.TestRunner(lib));
-            t.run("types", lvgl.types.TestRunner(lib));
-            t.run("Color", lvgl.Color.TestRunner(lib));
-            t.run("Point", lvgl.Point.TestRunner(lib));
-            t.run("Area", lvgl.Area.TestRunner(lib));
-            t.run("Style", lvgl.Style.TestRunner(lib));
-            t.run("Display", lvgl.Display.TestRunner(lib));
-            t.run("Indev", lvgl.Indev.TestRunner(lib));
-            t.run("Tick", lvgl.Tick.TestRunner(lib));
-            t.run("Event", lvgl.Event.TestRunner(lib));
-            t.run("Anim", lvgl.Anim.TestRunner(lib));
-            t.run("Subject", lvgl.Subject.TestRunner(lib));
-            t.run("Observer", lvgl.Observer.TestRunner(lib));
-            t.run("object/Obj", lvgl.object.Obj.TestRunner(lib));
-            t.run("object/Tree", lvgl.object.Tree.TestRunner(lib));
-            t.run("object/Flags", lvgl.object.Flags.TestRunner(lib));
-            t.run("object/State", lvgl.object.State.TestRunner(lib));
-            t.run("widget/Label", lvgl.Label.TestRunner(lib));
-            t.run("widget/Button", lvgl.Button.TestRunner(lib));
-            t.run("display/TestingDisplay", TestingDisplay.TestRunner(lib));
+            t.run("binding", lvgl.binding.TestRunner(grt));
+            t.run("types", lvgl.types.TestRunner(grt));
+            t.run("Color", lvgl.Color.TestRunner(grt));
+            t.run("Point", lvgl.Point.TestRunner(grt));
+            t.run("Area", lvgl.Area.TestRunner(grt));
+            t.run("Style", lvgl.Style.TestRunner(grt));
+            t.run("Display", lvgl.Display.TestRunner(grt));
+            t.run("Indev", lvgl.Indev.TestRunner(grt));
+            t.run("Tick", lvgl.Tick.TestRunner(grt));
+            t.run("Event", lvgl.Event.TestRunner(grt));
+            t.run("Anim", lvgl.Anim.TestRunner(grt));
+            t.run("Subject", lvgl.Subject.TestRunner(grt));
+            t.run("Observer", lvgl.Observer.TestRunner(grt));
+            t.run("object/Obj", lvgl.object.Obj.TestRunner(grt));
+            t.run("object/Tree", lvgl.object.Tree.TestRunner(grt));
+            t.run("object/Flags", lvgl.object.Flags.TestRunner(grt));
+            t.run("object/State", lvgl.object.State.TestRunner(grt));
+            t.run("widget/Label", lvgl.Label.TestRunner(grt));
+            t.run("widget/Button", lvgl.Button.TestRunner(grt));
+            t.run("display/TestingDisplay", TestingDisplay.TestRunner(grt));
 
             return t.wait();
         }
 
-        pub fn deinit(self: *@This(), allocator: embed.mem.Allocator) void {
+        pub fn deinit(self: *@This(), allocator: std.mem.Allocator) void {
             _ = allocator;
-            lib.testing.allocator.destroy(self);
+            std.heap.page_allocator.destroy(self);
         }
     };
 
-    const runner = lib.testing.allocator.create(Runner) catch @panic("OOM");
+    const runner = std.heap.page_allocator.create(Runner) catch @panic("OOM");
     runner.* = .{};
     return testing.TestRunner.make(Runner).new(runner);
 }

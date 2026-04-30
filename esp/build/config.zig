@@ -44,7 +44,7 @@ pub fn resolveAppName(b: *std.Build) []const u8 {
 
     if (names.len == 0) {
         std.debug.panic(
-            "no app dependencies found in esp/build.zig.zon; run `make zon` first",
+            "no app dependencies found in esp/build.zig.zon",
             .{},
         );
     }

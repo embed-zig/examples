@@ -334,16 +334,10 @@ fn ensureOptimizeSharedLinks(
     try deletePathIfPresent(apps_link_path);
     try zig_std.fs.symLinkAbsolute(apps_path, apps_link_path, .{ .is_directory = true });
 
-    const repo_parent = zig_std.fs.path.dirname(repo_root) orelse return error.InvalidRepoRoot;
-    const embed_zig_path = try zig_std.fs.path.join(allocator, &.{ repo_parent, "embed-zig" });
-    const embed_zig_link_path = try zig_std.fs.path.join(allocator, &.{ matrix_root_path, "embed-zig" });
-    try deletePathIfPresent(embed_zig_link_path);
-    try zig_std.fs.symLinkAbsolute(embed_zig_path, embed_zig_link_path, .{ .is_directory = true });
-
-    const embed_zig_pkgs_path = try zig_std.fs.path.join(allocator, &.{ repo_parent, "embed-zig-pkgs" });
-    const embed_zig_pkgs_link_path = try zig_std.fs.path.join(allocator, &.{ matrix_root_path, "embed-zig-pkgs" });
-    try deletePathIfPresent(embed_zig_pkgs_link_path);
-    try zig_std.fs.symLinkAbsolute(embed_zig_pkgs_path, embed_zig_pkgs_link_path, .{ .is_directory = true });
+    const vendor_path = try zig_std.fs.path.join(allocator, &.{ repo_root, "vendor" });
+    const vendor_link_path = try zig_std.fs.path.join(allocator, &.{ optimize_root_path, "vendor" });
+    try deletePathIfPresent(vendor_link_path);
+    try zig_std.fs.symLinkAbsolute(vendor_path, vendor_link_path, .{ .is_directory = true });
 }
 
 fn stageEspWorkspace(

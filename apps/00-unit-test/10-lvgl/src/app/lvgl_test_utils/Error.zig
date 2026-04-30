@@ -1,4 +1,4 @@
-const display_api = @import("drivers");
+const display_api = @import("embed").drivers;
 
 pub const Error = display_api.Display.Error || error{
     UnexpectedDraw,

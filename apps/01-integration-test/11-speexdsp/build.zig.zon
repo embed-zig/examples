@@ -4,14 +4,7 @@
     .fingerprint = 0x5942454ad731b5e9,
     .minimum_zig_version = "0.15.2",
     .dependencies = .{
-        .embed_zig = .{
-            .url = "https://codeload.github.com/embed-zig/embed-zig/tar.gz/refs/tags/v1.0.0",
-            .hash = "embed_zig-1.0.0-prAy_Mf7SwCqTYSGufoSyeo4iaS4XpZo5EdBfLvvx4Uq",
-        },
-        .speexdsp = .{
-            .url = "https://codeload.github.com/embed-zig/speexdsp/tar.gz/refs/tags/v0.1.0",
-            .hash = "speexdsp-0.1.0-NZB57674AABjBjvI9Ax3xmmLwuUZmQDRUe0j07t_zXwO",
-        },
+        .embed_zig = .{ .path = "../../../vendor/embed-zig" },
     },
     .platforms = .{
         "esp",

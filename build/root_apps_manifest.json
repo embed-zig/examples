@@ -1,0 +1,169 @@
+{
+  "apps": [
+    {
+      "key": "unit-test_std",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/00-std"
+    },
+    {
+      "key": "unit-test_net",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/01-net"
+    },
+    {
+      "key": "unit-test_sync",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/02-sync"
+    },
+    {
+      "key": "unit-test_mime",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/03-mime"
+    },
+    {
+      "key": "unit-test_testing",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/04-testing"
+    },
+    {
+      "key": "unit-test_motion",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/05-motion"
+    },
+    {
+      "key": "unit-test_audio",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/06-audio"
+    },
+    {
+      "key": "unit-test_zux",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/07-zux"
+    },
+    {
+      "key": "unit-test_bt",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/08-bt"
+    },
+    {
+      "key": "unit-test_io",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/09-io"
+    },
+    {
+      "key": "unit-test_lvgl",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/10-lvgl"
+    },
+    {
+      "key": "unit-test_opus",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/11-opus"
+    },
+    {
+      "key": "unit-test_modem",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/12-modem"
+    },
+    {
+      "key": "unit-test_at",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/13-at"
+    },
+    {
+      "key": "unit-test_drivers",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/14-drivers"
+    },
+    {
+      "key": "unit-test_ledstrip",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/15-ledstrip"
+    },
+    {
+      "key": "unit-test_context",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/16-context"
+    },
+    {
+      "key": "unit-test_ledstrip-animator",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/17-ledstrip-animator"
+    },
+    {
+      "key": "unit-test_stb-truetype",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/19-stb-truetype"
+    },
+    {
+      "key": "unit-test_speexdsp",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/20-speexdsp"
+    },
+    {
+      "key": "unit-test_portaudio",
+      "group": "unit",
+      "root_path": "apps/00-unit-test/21-portaudio"
+    },
+    {
+      "key": "integration-test_net",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/01-net"
+    },
+    {
+      "key": "integration-test_sync",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/02-sync"
+    },
+    {
+      "key": "integration-test_audio",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/03-audio"
+    },
+    {
+      "key": "integration-test_at",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/04-at"
+    },
+    {
+      "key": "integration-test_bt",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/05-bt"
+    },
+    {
+      "key": "integration-test_zux",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/06-zux"
+    },
+    {
+      "key": "integration-test_lvgl",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/07-lvgl"
+    },
+    {
+      "key": "integration-test_opus",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/08-opus"
+    },
+    {
+      "key": "integration-test_stb-truetype",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/10-stb-truetype"
+    },
+    {
+      "key": "integration-test_speexdsp",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/11-speexdsp"
+    },
+    {
+      "key": "integration-test_portaudio",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/12-portaudio"
+    },
+    {
+      "key": "integration-test_zux-runtime-init",
+      "group": "integration",
+      "root_path": "apps/01-integration-test/13-zux-runtime-init"
+    }
+  ]
+}

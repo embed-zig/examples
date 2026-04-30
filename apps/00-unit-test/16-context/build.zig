@@ -8,31 +8,18 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const tests_context_mod = b.createModule(.{
-        .root_source_file = embed_dep.path("lib/tests/context.zig"),
-        .target = target,
-        .optimize = optimize,
-        .imports = &.{
-            .{ .name = "embed", .module = embed_dep.module("embed") },
-            .{ .name = "testing", .module = embed_dep.module("testing") },
-            .{ .name = "context", .module = embed_dep.module("context") },
-        },
-    });
-    b.modules.put(b.dupe("tests_context"), tests_context_mod) catch @panic("OOM");
-
     const app_mod = b.addModule("app", .{
         .root_source_file = b.path("src/app.zig"),
         .target = target,
         .optimize = optimize,
         .imports = &.{
-            .{ .name = "tests_context", .module = tests_context_mod },
-            .{ .name = "testing", .module = embed_dep.module("testing") },
+            .{ .name = "glib", .module = embed_dep.module("glib") },
+            .{ .name = "embed", .module = embed_dep.module("embed") },
+            .{ .name = "gstd", .module = embed_dep.module("gstd") },
         },
     });
 
-    const tests = b.addTest(.{
-        .root_module = app_mod,
-    });
+    const tests = b.addTest(.{ .root_module = app_mod });
     const run_tests = b.addRunArtifact(tests);
 
     const test_step = b.step("test", "Run host tests for unit-test-context");

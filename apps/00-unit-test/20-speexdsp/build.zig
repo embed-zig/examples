@@ -7,21 +7,16 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    const speex_dep = b.dependency("speexdsp", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    const speex_mod = speex_dep.module("speexdsp");
-    speex_mod.addImport("embed", embed_dep.module("embed"));
-    speex_mod.addImport("testing", embed_dep.module("testing"));
 
     const app_mod = b.addModule("app", .{
         .root_source_file = b.path("src/app.zig"),
         .target = target,
         .optimize = optimize,
         .imports = &.{
-            .{ .name = "speexdsp", .module = speex_mod },
-            .{ .name = "testing", .module = embed_dep.module("testing") },
+            .{ .name = "glib", .module = embed_dep.module("glib") },
+            .{ .name = "embed", .module = embed_dep.module("embed") },
+            .{ .name = "gstd", .module = embed_dep.module("gstd") },
+            .{ .name = "speexdsp", .module = embed_dep.module("speexdsp") },
         },
     });
 

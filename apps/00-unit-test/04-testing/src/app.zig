@@ -1,34 +1,40 @@
-const testing = @import("testing");
+const glib = @import("glib");
+const testing = @import("glib").testing;
 
-pub fn run(comptime runtime: type) !void {
-    const std = runtime.std;
-    const app_log = std.log.scoped(.compat_tests);
+pub fn run(comptime ctx: type, comptime grt: type) !void {
+    comptime {
+        if (!glib.runtime.is(grt)) @compileError("grt must be a glib runtime namespace");
+    }
 
-    try runtime.setup();
-    defer runtime.teardown();
+    const log = grt.std.log.scoped(.compat_tests);
 
-    app_log.info("starting testing unit runner", .{});
+    try ctx.setup();
+    defer ctx.teardown();
 
-    var runner = testing.T.new(std, .compat_tests);
+    log.info("starting testing unit runner", .{});
+
+    var runner = testing.T.new(grt.std, grt.time, .compat_tests);
     defer runner.deinit();
 
-    runner.timeout(240 * std.time.ns_per_s);
-    runner.run("testing/unit", testing.test_runner.unit.make(std));
+    runner.timeout(240 * glib.time.duration.Second);
+    runner.run("testing/unit", testing.test_runner.unit.make(grt.std, grt.time));
 
     const passed = runner.wait();
-    app_log.info("testing unit runner finished", .{});
+    log.info("testing unit runner finished", .{});
     if (!passed) return error.TestsFailed;
 }
 
 test run {
-    @import("std").testing.log_level = .info;
+    const std = @import("std");
+    const gstd = @import("gstd");
 
-    const HostRuntime = struct {
-        pub const std = @import("std");
+    std.testing.log_level = .info;
+
+    const TestContext = struct {
+        pub const allocator = std.testing.allocator;
 
         pub fn setup() !void {}
         pub fn teardown() void {}
     };
-
-    try run(HostRuntime);
+    try run(TestContext, gstd.runtime);
 }

@@ -1,0 +1,16 @@
+.{
+    .name = .embed_zig,
+    .version = "2.0.1",
+    .fingerprint = 0x3e50a1e0039c87cf,
+    .minimum_zig_version = "0.15.2",
+    .dependencies = .{
+        .upstream = .{
+            .url = "https://codeload.github.com/embed-zig/embed-zig/tar.gz/v2.0.1",
+            .hash = "embed_zig-2.0.1-prAy_AZZZADz-eEX5bbg00oXHAG-fxD_-0ZyYmCP0bhW",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+    },
+}

@@ -1,37 +1,41 @@
-const zux = @import("zux");
-const testing = @import("testing");
+const glib = @import("glib");
+const zux = @import("embed").zux;
+const testing = @import("glib").testing;
 
-pub fn run(comptime runtime: type) !void {
-    const std = runtime.std;
-    const app_log = std.log.scoped(.compat_tests);
+pub fn run(comptime ctx: type, comptime grt: type) !void {
+    comptime {
+        if (!glib.runtime.is(grt)) @compileError("grt must be a glib runtime namespace");
+    }
 
-    try runtime.setup();
-    defer runtime.teardown();
+    const log = grt.std.log.scoped(.compat_tests);
 
-    app_log.info("starting zux integration runner", .{});
+    try ctx.setup();
+    defer ctx.teardown();
 
-    var runner = testing.T.new(std, .compat_tests);
+    log.info("starting zux integration runner", .{});
+
+    var runner = testing.T.new(grt.std, grt.time, .compat_tests);
     defer runner.deinit();
 
-    runner.timeout(480 * std.time.ns_per_s);
-    runner.run("zux/integration", zux.test_runner.integration.make(std, runtime.Channel));
+    runner.timeout(480 * glib.time.duration.Second);
+    runner.run("zux/integration", zux.test_runner.integration.make(grt));
 
     const passed = runner.wait();
-    app_log.info("zux integration runner finished", .{});
+    log.info("zux integration runner finished", .{});
     if (!passed) return error.TestsFailed;
 }
 
 test run {
-    @import("std").testing.log_level = .info;
-    const embed_std = @import("embed_std");
+    const std = @import("std");
+    const gstd = @import("gstd");
 
-    const HostRuntime = struct {
-        pub const std = @import("std");
-        pub const Channel = embed_std.sync.Channel;
+    std.testing.log_level = .info;
+
+    const TestContext = struct {
+        pub const allocator = std.testing.allocator;
 
         pub fn setup() !void {}
         pub fn teardown() void {}
     };
-
-    try run(HostRuntime);
+    try run(TestContext, gstd.runtime);
 }

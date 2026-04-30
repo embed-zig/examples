@@ -26,8 +26,7 @@ pub fn addCompileMatrixRun(
         .optimize = .Debug,
         .imports = &.{
             .{ .name = "embed", .module = embed_dep.module("embed") },
-            .{ .name = "embed_std", .module = embed_dep.module("embed_std") },
-            .{ .name = "testing", .module = embed_dep.module("testing") },
+            .{ .name = "glib", .module = embed_dep.module("glib") },
         },
     });
     const exe = b.addExecutable(.{

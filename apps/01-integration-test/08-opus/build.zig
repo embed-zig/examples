@@ -7,28 +7,20 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .optimize = optimize,
     });
-    const opus_dep = b.dependency("opus", .{
-        .target = target,
-        .optimize = optimize,
-        .opus_config_header = b.path("opus_config.h"),
-    });
-    const opus_mod = opus_dep.module("opus");
-    opus_mod.addImport("embed", embed_dep.module("embed"));
-    opus_mod.addImport("testing", embed_dep.module("testing"));
 
     const app_mod = b.addModule("app", .{
         .root_source_file = b.path("src/app.zig"),
         .target = target,
         .optimize = optimize,
         .imports = &.{
-            .{ .name = "opus", .module = opus_mod },
-            .{ .name = "testing", .module = embed_dep.module("testing") },
+            .{ .name = "glib", .module = embed_dep.module("glib") },
+            .{ .name = "embed", .module = embed_dep.module("embed") },
+            .{ .name = "gstd", .module = embed_dep.module("gstd") },
+            .{ .name = "opus", .module = embed_dep.module("opus") },
         },
     });
 
-    const tests = b.addTest(.{
-        .root_module = app_mod,
-    });
+    const tests = b.addTest(.{ .root_module = app_mod });
     const run_tests = b.addRunArtifact(tests);
 
     const test_step = b.step("test", "Run host tests for integration-test-opus");

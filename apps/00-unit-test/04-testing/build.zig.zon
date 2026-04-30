@@ -4,10 +4,7 @@
     .fingerprint = 0xe6246c597f37f019,
     .minimum_zig_version = "0.15.2",
     .dependencies = .{
-        .embed_zig = .{
-            .url = "https://codeload.github.com/embed-zig/embed-zig/tar.gz/refs/tags/v1.0.0",
-            .hash = "embed_zig-1.0.0-prAy_Mf7SwCqTYSGufoSyeo4iaS4XpZo5EdBfLvvx4Uq",
-        },
+        .embed_zig = .{ .path = "../../../vendor/embed-zig" },
     },
     .platforms = .{
         "esp",

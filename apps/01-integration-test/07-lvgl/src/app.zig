@@ -1,56 +1,54 @@
+const glib = @import("glib");
 const lvgl = @import("lvgl");
-const testing = @import("testing");
+const testing = @import("glib").testing;
 const app_lvgl_osal = @import("app/lvgl_osal.zig");
 
-pub fn run(comptime runtime: type) !void {
-    const lib = runtime.std;
-    const app_log = lib.log.scoped(.compat_tests);
-    const alloc = if (@hasDecl(runtime, "allocator")) runtime.allocator else lib.testing.allocator;
-
+pub fn run(comptime ctx: type, comptime grt: type) !void {
     comptime {
-        app_lvgl_osal.init(runtime);
+        if (!glib.runtime.is(grt)) @compileError("grt must be a glib runtime namespace");
     }
 
-    try runtime.setup();
-    defer runtime.teardown();
+    const log = grt.std.log.scoped(.compat_tests);
+
+    comptime {
+        app_lvgl_osal.init(ctx, grt);
+    }
+
+    try ctx.setup();
+    defer ctx.teardown();
     defer if (lvgl.isInitialized()) lvgl.deinit();
 
-    app_log.info("starting lvgl integration runner", .{});
+    log.info("starting lvgl integration runner", .{});
 
-    var testing_display = lvgl.IntegrationTestingDisplay.initPassthrough(alloc, 320, 240, null);
+    var testing_display = lvgl.IntegrationTestingDisplay.initPassthrough(ctx.allocator, 320, 240, null);
     defer testing_display.deinit();
 
-    var harness_display = try testing_display.display();
+    var harness_display = try testing_display.display(grt);
     defer harness_display.deinit();
 
-    var runner = testing.T.new(lib, .compat_tests);
+    var runner = testing.T.new(grt.std, grt.time, .compat_tests);
     defer runner.deinit();
 
-    runner.timeout(480 * lib.time.ns_per_s);
-    runner.run("lvgl/integration", lvgl.test_runner.integration.make(lib, &harness_display));
+    runner.timeout(480 * glib.time.duration.Second);
+    runner.run("lvgl/integration", lvgl.test_runner.integration.make(grt, &harness_display));
 
     const passed = runner.wait();
-    app_log.info("lvgl integration runner finished", .{});
+    log.info("lvgl integration runner finished", .{});
     if (!passed) return error.TestsFailed;
     try testing_display.assertComplete();
 }
 
 test run {
-    @import("std").testing.log_level = .info;
-    const embed_std = @import("embed_std");
+    const std = @import("std");
+    const gstd = @import("gstd");
 
-    const HostRuntime = struct {
-        pub const std = @import("std");
-        pub const mem = embed_std.std.mem;
-        pub const Thread = embed_std.std.Thread;
-        pub const heap = embed_std.std.heap;
-        pub const math = embed_std.std.math;
-        pub const testing = embed_std.std.testing;
-        pub const allocator = @import("std").heap.page_allocator;
+    std.testing.log_level = .info;
+
+    const TestContext = struct {
+        pub const allocator = std.testing.allocator;
 
         pub fn setup() !void {}
         pub fn teardown() void {}
     };
-
-    try run(HostRuntime);
+    try run(TestContext, gstd.runtime);
 }
